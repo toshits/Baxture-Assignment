@@ -33,7 +33,8 @@ router.get('/', async (req, res) => {
 router.get('/:userId', async (req, res) => {
     try {
         let { userId } = req.params
-        if (userId == null || typeof userId !== 'string') {
+        let uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        if (!uuidRegex.test(userId)) {
             res.status(400).json({
                 error: {
                     name: 'BadRequest',
@@ -105,12 +106,14 @@ router.post('/', async (req, res) => {
 
 })
 
+// Endpoint for updating user by id
 router.put('/:userId', async (req, res) => {
     try {
         const { userId } = req.params
         const { username, age, hobbies } = req.body
 
-        if (userId == null || typeof userId !== 'string') {
+        let uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        if (!uuidRegex.test(userId)) {
             res.status(400).json({
                 error: {
                     name: 'BadRequest',
@@ -146,6 +149,46 @@ router.put('/:userId', async (req, res) => {
         user.hobbies = hobbies
 
         res.status(200).json(user)
+    } catch (error) {
+        res.status(500).json({
+            error: {
+                name: 'InternalServerError',
+                message: 'Please try after some time'
+            }
+        })
+    }
+})
+
+// Endpoint for deleting user by id
+router.delete('/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params
+        let uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        if (!uuidRegex.test(userId)) {
+            res.status(400).json({
+                error: {
+                    name: 'BadRequest',
+                    message: 'Provide a valid user id'
+                }
+            })
+            return
+        }
+
+        const userIndex = users.findIndex((user) => user.id === userId)
+
+        if (userIndex === -1) {
+            res.status(404).json({
+                error: {
+                    name: 'NotFound',
+                    message: 'No user found'
+                }
+            })
+            return
+        }
+
+        users.splice(userIndex, 1)
+        res.status(204).json()
+
     } catch (error) {
         res.status(500).json({
             error: {
