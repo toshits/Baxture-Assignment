@@ -14,6 +14,16 @@ app.get('/', async (req, res)=>{
 import userRouter from './routes/user'
 app.use('/api/users', userRouter)
 
+// Middleware for not found routes
+app.use((req, res)=>{
+    res.status(404).json({
+        error: {
+            name: 'NotFound',
+            message: 'No route found'
+        }
+    })
+})
+
 app.listen(PORT, ()=>{
     console.log(`Express Server Started on Port ${PORT}`)
 })
