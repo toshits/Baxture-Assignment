@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "nodemon",
     "start:prod": "tsc & node ./dist/server.js",
-    "start:multi": "tsc && node ./dist/cluster.js",
+    "start:multi": "tsc && node ./dist/server.js --cluster",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,7 +14,8 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.3.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "redis": "^4.6.12"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

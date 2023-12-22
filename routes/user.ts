@@ -1,22 +1,14 @@
 import express from 'express'
 import crypto from 'crypto'
+import { User, addNewUser, getAllUsers, updateUsers } from '../helpers/userFunc'
 
 const router = express.Router()
 
-export type User = {
-    id: string,
-    username: string,
-    age: number,
-    hobbies: string[]
-}
-
-export type Users = User[]
-
-let users: Users = [] // in-memory database to store users
 
 // Endpoint for fetching all users
 router.get('/', async (req, res) => {
     try {
+        let users = await getAllUsers()
         res.json(users)
 
     } catch (error) {
@@ -43,7 +35,7 @@ router.get('/:userId', async (req, res) => {
             })
             return
         }
-
+        let users = await getAllUsers()
         const user = users.find((user) => user.id == userId)
         if (!user) {
             res.status(404).json({
@@ -87,7 +79,7 @@ router.post('/', async (req, res) => {
             hobbies
         }
 
-        users.push(user) // Adding to DB here
+        await addNewUser(user) // Adding to DB here
         res.status(201).json(user)
 
     } catch (error) {
@@ -98,12 +90,6 @@ router.post('/', async (req, res) => {
             }
         })
     }
-
-
-
-
-
-
 })
 
 // Endpoint for updating user by id
@@ -132,7 +118,7 @@ router.put('/:userId', async (req, res) => {
             })
             return
         }
-
+        let users = await getAllUsers()
         const user = users.find((user) => user.id == userId)
         if (!user) {
             res.status(404).json({
@@ -147,6 +133,15 @@ router.put('/:userId', async (req, res) => {
         user.username = username
         user.age = age
         user.hobbies = hobbies
+
+        let updatedUsers = await updateUsers(users)
+
+        if (updatedUsers == null) return res.status(500).json({
+            error: {
+                name: 'InternalServerError',
+                message: 'Please try after some time'
+            }
+        })
 
         res.status(200).json(user)
     } catch (error) {
@@ -173,7 +168,7 @@ router.delete('/:userId', async (req, res) => {
             })
             return
         }
-
+        let users = await getAllUsers()
         const userIndex = users.findIndex((user) => user.id === userId)
 
         if (userIndex === -1) {
@@ -187,8 +182,14 @@ router.delete('/:userId', async (req, res) => {
         }
 
         users.splice(userIndex, 1)
+        let updatedUsers = await updateUsers(users)
+        if (updatedUsers == null) return res.status(500).json({
+            error: {
+                name: 'InternalServerError',
+                message: 'Please try after some time'
+            }
+        })
         res.status(204).json()
-
     } catch (error) {
         res.status(500).json({
             error: {
